@@ -1,0 +1,45 @@
+from dash import Dash, html, dash_table, dcc, callback, Output, Input
+import pandas as pd
+import plotly.express as px
+
+df = pd.read_csv('https://raw.githubusercontent.com/mendaal2004/Analysis_of_sunset_and_sunrise_time_data-Type-to-search/main/lab.csv')
+
+app = Dash(__name__)
+
+app.layout = html.Div([
+    html.H1(children='Анализ данных о времени заката и восхода солнца', style={'textAlign':'center', 'color': 'orange', 'fontSize': 30}),
+
+    html.Div(children='''
+        Дашборд предназначен для анализа данных о времени заката и восхода солнца.
+        Включает в себя графики, диаграммы и таблицы для визуализации и анализа данных.
+    '''),
+
+    dash_table.DataTable(data=df.to_dict('records'), page_size=6, style_table={'overflowX': 'auto'}),
+
+    dcc.RadioItems(options=['sunrise', 'sunset'], inline=True, value='date', id='radioitems'),
+
+    dcc.Graph(figure={}, id='graph1'),
+
+    dcc.Graph(figure={}, id="graph2"),
+
+    dcc.Dropdown(options=['sunrise', 'sunset'], value='date', id='dropdown'),
+    dcc.Graph(figure={}, id="graph3"),
+])
+
+@callback(
+    Output(component_id='graph1', component_property='figure'),
+    Output(component_id='graph2', component_property='figure'),
+    Output(component_id='graph3', component_property='figure'),
+    Input(component_id='radioitems', component_property='value'),
+    Input(component_id='radioitems', component_property='value'),
+    Input(component_id='dropdown', component_property='value'),
+)
+
+def update_graph(col_chosen_1, col_chosen_2, col_chosen_3):
+    fig1 = px.bar(df, x=col_chosen_1, y='date')
+    fig2 = px.line(df, x=col_chosen_2, y='date')
+    fig3 = px.scatter(df, x=col_chosen_3, y='date')
+    return fig1, fig2, fig3
+
+if __name__ == '__main__':
+    app.run(debug=True)
